@@ -8,6 +8,7 @@ class Day:
     def __init__(self, day):
         self.day = day
         self.hasDoctor = False
+        self.doctors = []
 
 
 class Holidays:
@@ -19,9 +20,15 @@ class Holidays:
         for i in range(qtdDays):
             self.days.append(Day(str(i)))
         
-    def insertDoctorsInWorkHolidayDays(self, days):
-        for i in days:
-            self.days[int(i)].hasDoctor = True
+    def insertDoctorsInWorkHolidayDays(self, workDay, doctorName):
+        self.days[int(workDay)].hasDoctor = True
+        self.days[int(workDay)].doctors.append(doctorName)
+    
+    def checkIfDoctorIsAlreadyWorkingOnCurrentHoliday(self, doctorName):
+        for day in self.days:
+            if doctorName in day.doctors:
+                return True
+        return False
     
     def getDays (self):
         aux = []
@@ -29,7 +36,7 @@ class Holidays:
             aux.append(i.day)
         return aux
     
-    def checkAllDays(self):
+    def checkIfHolidayHasLeastOneDoctor(self):
         for day in self.days:
             if day.hasDoctor == False:
                 return False
@@ -64,17 +71,19 @@ while True:
             if holiday == "0":
                 break
             else:
-                days = (input(f"Digite os dias do feriado que ele irá trabalhar, separado por espaço(opções deste feriado - {holidays[holiday].getDays()}):")) 
-                arrayDays = days.split(" ")
-                if len(arrayDays) >= len(holidays[holiday].getDays()) and len(arrayDays) != 1:
+                days = (input(f"Digite qual dia do feriado que ele irá trabalhar(opções deste feriado - {holidays[holiday].getDays()}):")) 
+                workDay = days
+                if workDay not in holidays[holiday].getDays():
                     print("ERRO.")
                 else:
-                    totalDaysOfWork += len(arrayDays)
+                    totalDaysOfWork += 1
                     if totalDaysOfWork > totalMaximumDaysOfWork:
-                        totalDaysOfWork -= len(arrayDays)
+                        totalDaysOfWork -= 1
                         print(f"Este médico não pode trabalhar mais que {totalMaximumDaysOfWork} dias.")
+                    elif holidays[holiday].checkIfDoctorIsAlreadyWorkingOnCurrentHoliday(doctor): 
+                        print("Este médico já trabalha neste feriado. Considere que ele só pode trabalhar no máximo um dia de cada feriado, conforme regra 2.")
                     else:
-                        holidays[holiday].insertDoctorsInWorkHolidayDays(arrayDays)
+                        holidays[holiday].insertDoctorsInWorkHolidayDays(workDay, doctor)
         
 
 #VERIFICACAO SE HAVERÁ MÉDICOS PARA TODOS OS DIAS NOS FERIADOS OU NÃO
@@ -82,16 +91,9 @@ while True:
 flag = 0
 
 for holiday, holidayObj in holidays.items():
-    if not holidayObj.checkAllDays():
+    if not holidayObj.checkIfHolidayHasLeastOneDoctor():
         flag = 1
         break
 
 print("Não existe médico suficiente para todos os conjuntos de feriados") if flag == 1 else print("Existe pelo menos um médico de plantão em cada dia de cada feriado!")
         
-
-
-
-
-
-
-
